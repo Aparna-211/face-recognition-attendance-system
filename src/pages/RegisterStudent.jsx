@@ -8,7 +8,7 @@ export default function RegisterStudent() {
   const [studentId, setStudentId] = useState('');
   const [status, setStatus] = useState('Loading camera and models...');
 
-  useEffect(() => {
+ useEffect(() => {
   let stream;
 
   async function init() {
@@ -20,14 +20,10 @@ export default function RegisterStudent() {
         return;
       }
 
-      await loadModels();
+     // await loadModels();
 
       stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        },
+        video: true,
         audio: false
       });
 
@@ -36,10 +32,10 @@ export default function RegisterStudent() {
         await videoRef.current.play();
       }
 
-      setStatus('Camera ready. Look straight and register.');
+      setStatus('Camera ready. Register your face.');
     } catch (error) {
-      console.error('Camera error:', error);
-      setStatus(`Unable to access camera: ${error.message}`);
+      console.error('Camera/model error:', error);
+      setStatus(`Unable to start: ${error.message}`);
     }
   }
 
@@ -47,28 +43,30 @@ export default function RegisterStudent() {
 
   return () => {
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach(track => track.stop());
     }
   };
 }, []);
 
   async function handleRegister() {
-    if (!fullName || !studentId) {
-      setStatus('Please enter student name and ID.');
-      return;
-    }
+  if (!fullName || !studentId) {
+    setStatus('Please enter student name and ID.');
+    return;
+  }
 
-    const existing = getStudents().find((s) => s.studentId === studentId);
-    if (existing) {
-      setStatus('Student ID already exists.');
-      return;
-    }
+  const existing = getStudents().find((s) => s.studentId === studentId);
+  if (existing) {
+    setStatus('Student ID already exists.');
+    return;
+  }
 
+  try {
     setStatus('Capturing face...');
+
     const detection = await getFaceDescriptorFromVideo(videoRef.current);
 
     if (!detection) {
-      setStatus('No face detected. Please align your face properly.');
+      setStatus('No face detected. Please look straight at the camera.');
       return;
     }
 
@@ -82,7 +80,11 @@ export default function RegisterStudent() {
     setStatus(`Student ${fullName} registered successfully.`);
     setFullName('');
     setStudentId('');
+  } catch (error) {
+    console.error('Registration error:', error);
+    setStatus(`Registration failed: ${error.message}`);
   }
+}
 
   return (
     <section>

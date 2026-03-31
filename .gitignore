@@ -4,5 +4,4 @@ dist/
 .vscode/
 .DS_Store
 
-git commit -m "Clean repository and update gitignore"
-git push
+

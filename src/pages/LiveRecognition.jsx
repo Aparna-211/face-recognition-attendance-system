@@ -18,7 +18,7 @@ export default function LiveRecognition() {
         return;
       }
 
-      await loadModels();
+     // await loadModels();
 
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
